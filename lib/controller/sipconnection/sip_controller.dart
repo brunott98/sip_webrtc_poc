@@ -70,6 +70,7 @@ class SipController extends GetxController implements SipUaHelperListener {
   void onClose() {
     sipUaHelper.removeSipUaHelperListener(this);
     sipUaHelper.stop();
+    isRegistered.value = false;
     super.onClose();
   }
 
