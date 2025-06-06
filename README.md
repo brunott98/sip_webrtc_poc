@@ -1,16 +1,40 @@
-# pocsip
+# POCSIP
 
-A new Flutter project.
+**Proof of Concept (POC)** in Flutter showcasing SIP and WebRTC integration using the **MVC pattern**.  
+This project uses the following packages:
 
-## Getting Started
+- [GetX](https://pub.dev/packages/get) – state management and routing
+- [permission_handler](https://pub.dev/packages/permission_handler) – for managing runtime permissions
+- [sip_ua](https://pub.dev/packages/sip_ua) – SIP protocol implementation
+- [flutter_webrtc](https://pub.dev/packages/flutter_webrtc) – WebRTC support
 
-This project is a starting point for a Flutter application.
+---
 
-A few resources to get you started if this is your first Flutter project:
+## 📦 Project Configuration
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Requirements
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- Java: `1.8.0_401`
+- Flutter: `3.22.3`
+- Dart: `3.4.4`
+
+### Setup Instructions
+
+To run this project, you **must create** the following configuration file 
+on lib/util/config/sip_config.dart about your connection parameters.
+
+### Code briefing
+- **`AuthController`**  
+  Responsible for receiving user input and performing SIP login authentication.
+
+- **`SipRepository`**  
+  Handles SIP connection logic, including registration and termination with the SIP server.
+
+- **`CallController`**  
+  Manages the state of SIP calls, including handling call lifecycle events (e.g., 
+- incoming call, connected, ended).
+
+## 🔧 Current Platform in Development
+   [✅] ANDROID | [✅]IOS
+
+

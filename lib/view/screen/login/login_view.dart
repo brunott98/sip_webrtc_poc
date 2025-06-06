@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:pocsip/controller/auth/user_controller.dart';
-import '../../../model/user_model.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:pocsip/controller/auth_controller.dart';
+import '../../../model/data/user_model.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -12,11 +12,12 @@ class LoginView extends StatefulWidget {
 }
 
 class _LoginViewState extends State<LoginView> {
+  final _authController = Get.find<AuthController>();
 
   final nameController = TextEditingController();
   final ramalController = TextEditingController();
   final passwordController = TextEditingController();
-  final RxBool isFormValid = false.obs;
+  final isFormValid = false.obs;
 
   @override
   void initState() {
@@ -26,6 +27,105 @@ class _LoginViewState extends State<LoginView> {
     nameController.addListener(_validateForm);
     ramalController.addListener(_validateForm);
     passwordController.addListener(_validateForm);
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    ramalController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final width = screenSize.width;
+    final height = screenSize.height;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('SIP - LOGIN'),
+        toolbarHeight: height * 0.08,
+      ),
+      body: Obx(
+            () => Stack(
+          children: [
+            _buildForm(width, height),
+            if (_authController.isConnecting.value! &&
+                !_authController.isRegistered.value!)
+              Container(
+                color: Colors.black45,
+                child: const Center(child: CircularProgressIndicator()),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildForm(double width, double height) {
+    return SingleChildScrollView(
+      padding: EdgeInsets.symmetric(horizontal: width * 0.1),
+      child: Column(
+        children: [
+          SizedBox(height: height * 0.05),
+          _buildTextField(nameController, 'Name', height),
+          SizedBox(height: height * 0.025),
+          _buildTextField(ramalController, 'Ramal', height, keyboard: TextInputType.number),
+          SizedBox(height: height * 0.025),
+          _buildTextField(passwordController, 'Senha', height, obscure: true),
+          SizedBox(height: height * 0.05),
+          Obx(
+                () => SizedBox(
+              width: width * 0.6,
+              height: height * 0.06,
+              child: ElevatedButton(
+                onPressed: isFormValid.value ? _onLoginPressed : null,
+                child: Text(
+                  'login',
+                  style: TextStyle(fontSize: height * 0.022),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextField(TextEditingController controller,
+      String label,
+      double height,
+      {TextInputType keyboard = TextInputType.text, bool obscure = false}) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboard,
+      obscureText: obscure,
+      style: TextStyle(fontSize: height * 0.022),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(fontSize: height * 0.022),
+        border: const OutlineInputBorder(),
+      ),
+    );
+  }
+
+  ///Helpers
+  Future<void> _onLoginPressed() async {
+    final user = UserModel(
+      displayName: nameController.text,
+      privateIdentity: ramalController.text,
+      password: passwordController.text,
+    );
+
+    await _authController.login(user);
+
+    if (_authController.isRegistered.value!) {
+      Get.offAllNamed('/home');
+    } else {
+      Get.snackbar('Error', 'failed to login');
+    }
   }
 
   Future<void> _requestPermissions() async {
@@ -39,49 +139,4 @@ class _LoginViewState extends State<LoginView> {
         passwordController.text.isNotEmpty;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('ACESSO')),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(labelText: 'Nome'),
-            ),
-            TextField(
-              controller: ramalController,
-              decoration: const InputDecoration(labelText: 'Ramal'),
-              keyboardType: TextInputType.number,
-            ),
-            TextField(
-              controller: passwordController,
-              decoration: const InputDecoration(labelText: 'Senha'),
-              obscureText: true,
-            ),
-            const SizedBox(height: 20),
-            Obx(() => ElevatedButton(
-              onPressed: isFormValid.value
-                  ? () async {
-                final user = UserModel(
-                  displayName: nameController.text,
-                  privateIdentity: ramalController.text,
-                  password: passwordController.text,
-                );
-                await Get.find<UserController>().login(user);
-                Get.toNamed('/home');
-              }
-                  : null,
-              child: const Text('Entrar'),
-            )),
-          ],
-        ),
-      ),
-    );
-  }
-
 }
-
-

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:pocsip/controller/auth/user_controller.dart';
+import 'package:pocsip/controller/auth_controller.dart';
+import 'package:pocsip/view/screen/call/call_screen_view.dart';
 import 'package:pocsip/view/screen/login/login_view.dart';
-import 'view/screen/call/call_view.dart';
-import 'view/screen/home/home_view.dart';
+import 'view/screen/home/home_screen_view.dart';
+
 
 void main() {
-  Get.put(UserController());
+  Get.put(AuthController());
   runApp(const MyApp());
 }
 
@@ -26,11 +27,11 @@ class MyApp extends StatelessWidget {
         ),
         GetPage(
           name: '/home',
-          page: () => HomeView(),
+          page: () => const HomeScreenView(),
         ),
         GetPage(
           name: '/call',
-          page: () => CallView(),
+          page: () => const CallView(),
         ),
       ],
     );

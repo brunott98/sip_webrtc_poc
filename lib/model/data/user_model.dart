@@ -1,8 +1,8 @@
 
 class UserModel {
-  final String displayName;      // Nome visível no app
+  final String displayName;      // Your name
   final String privateIdentity;  // Ramal SIP (ex: 7001)
-  final String password;         // Senha do ramal
+  final String password;         // Ramal password
 
   UserModel({
     required this.displayName,
