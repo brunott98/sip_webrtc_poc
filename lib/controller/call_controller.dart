@@ -2,6 +2,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:get/get.dart';
 import 'package:pocsip/util/config/sip_config.dart';
 import 'package:sip_ua/sip_ua.dart';
@@ -26,11 +27,16 @@ class CallController extends GetxController implements SipUaHelperListener{
   final Rx<RegistrationStateEnum> registrationState = RegistrationStateEnum.NONE.obs;
   final Rx<TransportStateEnum> transportState = TransportStateEnum.NONE.obs;
   final Rx<CallStateEnum> callState = CallStateEnum.NONE.obs;
-
-  Completer<bool>? _registerCompleter; //Completer helper for login
-  Call? currentCall;
+  final Rxn<Call> currentCall = Rxn<Call>();
 
 
+  ///Call data
+  final Rx<MediaStream?>            remoteStream      = Rx<MediaStream?>(null);
+  final Rx<MediaStream?>            localStream       = Rx<MediaStream?>(null);
+
+
+  ///Login completer
+  Completer<bool>? _registerCompleter;
 
 
   ///Setters
@@ -61,7 +67,6 @@ class CallController extends GetxController implements SipUaHelperListener{
 
   }
 
-
   //Websocket connection with SIP Server
   @override
   void transportStateChanged(TransportState state) {
@@ -83,20 +88,21 @@ class CallController extends GetxController implements SipUaHelperListener{
 
   }
 
-
   @override
   void callStateChanged(Call call, CallState state) {
 
-    currentCall =  call;
+    currentCall.value =  call;
     callState.value = state.state;
 
     if (state.state == CallStateEnum.FAILED ||
         state.state == CallStateEnum.ENDED) {
       clear();
+    }else if(state.state == CallStateEnum.STREAM){
+      if (state.originator == 'remote' && remoteStream.value != state.stream) remoteStream.value = state.stream;
+      if (state.originator == 'local'  && localStream.value  != state.stream)  localStream.value  = state.stream;
     }
 
   }
-
 
   // TODO: implement onNewReinvite
   @override
@@ -104,13 +110,11 @@ class CallController extends GetxController implements SipUaHelperListener{
 
   }
 
-
   // TODO: implement onNewMessage
   @override
   void onNewMessage(SIPMessageRequest msg) {
 
   }
-
 
   // TODO: implement onNewNotify
   @override
@@ -119,12 +123,12 @@ class CallController extends GetxController implements SipUaHelperListener{
   }
 
 
-
   ///-------------------Call methods-------------------
+
   Future<void> startCall({ required String ramalTarget,
     required bool withVideo}) async {
 
-    if (currentCall != null && currentRamal == null) return;
+    if (currentCall.value != null && currentRamal == null) return;
     if(ramalTarget == currentRamal) return;
 
     //First check if we are connected to SIP server
@@ -136,6 +140,7 @@ class CallController extends GetxController implements SipUaHelperListener{
       }
     }
   }
+
 
   Future <void> startVoiceCall(String ramalTarget) async {
 
@@ -187,7 +192,7 @@ class CallController extends GetxController implements SipUaHelperListener{
     try{
 
       final options = currentSipUaHelper!.buildCallOptions(withVideo);
-      currentCall!.answer(options);
+      currentCall.value!.answer(options);
 
     }catch(e){
       log('acceptCall| $e');
@@ -197,20 +202,23 @@ class CallController extends GetxController implements SipUaHelperListener{
 
 
   Future<void> endCall() async {
-    if (currentCall == null) return;
+    if (currentCall.value == null) return;
 
-    currentCall!.hangup();
+    currentCall.value!.hangup();
     clear();
   }
 
 
   void clear() {
-    currentCall = null;
-    callState.value = CallStateEnum.NONE;
+    remoteStream.value?.getTracks().forEach((t) => t.stop());
+    localStream.value?.getTracks().forEach((t) => t.stop());
+    remoteStream.value = null;
+    localStream.value  = null;
+    currentCall.value  = null;
+    callState.value    = CallStateEnum.NONE;
   }
+
   ///--------------------------------------
-
-
 
 
   ///-------------------Connection methods-------------------

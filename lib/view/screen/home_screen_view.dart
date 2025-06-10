@@ -4,9 +4,9 @@ import 'package:pocsip/controller/auth_controller.dart';
 import 'package:pocsip/controller/call_controller.dart';
 
 import 'package:pocsip/model/ui/register_state_ui_model.dart';
-import 'package:pocsip/view/screen/call/call_states/default_call_view.dart';
-import 'package:pocsip/view/screen/call/call_states/incoming_call_view.dart';
-import 'package:pocsip/view/screen/call/call_states/making_call_view.dart';
+import 'package:pocsip/view/states/call/default_call_view.dart';
+import 'package:pocsip/view/states/call/incoming_call_view.dart';
+import 'package:pocsip/view/states/call/making_call_view.dart';
 import 'package:sip_ua/sip_ua.dart';
 
 class HomeScreenView extends StatefulWidget {
@@ -20,8 +20,6 @@ class _HomeScreenViewState extends State<HomeScreenView> {
 
   final _auth = Get.find<AuthController>();
   final _callController = Get.find<CallController>();
-
-  final TextEditingController _ramalTextController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -88,31 +86,24 @@ class _HomeScreenViewState extends State<HomeScreenView> {
 
 
         final currentCallState = _callController.callState.value;
-        final currentCall = _callController.currentCall;
-
+        final currentCall = _callController.currentCall.value;
 
         if(currentCall == null){
-          return const DefaultCallView();  //callStateEnum = none
+          return const DefaultCallView();
+
+        } else if(currentCall.direction == 'INCOMING' &&
+            currentCallState == CallStateEnum.PROGRESS){
+          return  IncomingCallView(currentCall: currentCall);
+
+        }else if(currentCall.direction == 'OUTGOING' &&
+            currentCallState == CallStateEnum.PROGRESS){
+          return MakingCallView(currentCall.remote_identity);
+          //TODO check: Somethings the actual state is lock in STREAM, change in controller?
+
         } else{
-
-          //TODO CHECK STATES...
-          if(currentCallState == CallStateEnum.PROGRESS ||
-              currentCallState == CallStateEnum.STREAM ||
-              currentCallState == CallStateEnum.CONNECTING ||
-              currentCallState == CallStateEnum.CALL_INITIATION){
-
-            if(currentCall.direction == 'INCOMING'){
-              return IncomingCallView(currentCall: currentCall);
-            } else if(currentCall.direction == 'OUTGOING'){
-              return MakingCallView(currentCall.remote_identity);
-            } else{
-              return const CircularProgressIndicator(); //TODO RETURN ERROR
-            }
+          return Center(child: Text("callState: $currentCallState \n currentCall: ${currentCall.direction}"));
         }
-          else{
-            return Center(child: Text("callState: $currentCallState \n currentCall: ${currentCall.direction}"));
-          }
-    }
+
       }),
 
     );
@@ -133,3 +124,5 @@ class _HomeScreenViewState extends State<HomeScreenView> {
   }
 
 
+//TODO check:  can't call because it is locked in a existing call?
+//

@@ -19,7 +19,8 @@ class IncomingCallView extends StatelessWidget {
     final width = screenSize.width;
     final height = screenSize.height;
 
-    final callTypeText = currentCall!.remote_has_video ? 'Video call from:' : 'Voice call from:';
+    final callTypeText = currentCall!.remote_has_video ?
+    'Video call from:' : 'Voice call from:';
 
     return Scaffold(
       backgroundColor: Colors.black.withOpacity(0.05),

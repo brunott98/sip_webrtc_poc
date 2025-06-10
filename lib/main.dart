@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pocsip/controller/auth_controller.dart';
-import 'package:pocsip/view/screen/call/call_screen_view.dart';
-import 'package:pocsip/view/screen/login/login_view.dart';
-import 'view/screen/home/home_screen_view.dart';
+import 'package:pocsip/view/screen/login_screen_view.dart';
+import 'view/screen/home_screen_view.dart';
 
 
 void main() {
@@ -23,15 +22,11 @@ class MyApp extends StatelessWidget {
       getPages: [
         GetPage(
           name: '/login',
-          page: () => const LoginView(),
+          page: () => const LoginScreenView(),
         ),
         GetPage(
           name: '/home',
           page: () => const HomeScreenView(),
-        ),
-        GetPage(
-          name: '/call',
-          page: () => const CallView(),
         ),
       ],
     );

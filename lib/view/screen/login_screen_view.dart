@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:pocsip/controller/auth_controller.dart';
-import '../../../model/data/user_model.dart';
+import '../../model/data/user_model.dart';
 
-class LoginView extends StatefulWidget {
-  const LoginView({super.key});
+class LoginScreenView extends StatefulWidget {
+  const LoginScreenView({super.key});
 
   @override
-  State<LoginView> createState() => _LoginViewState();
+  State<LoginScreenView> createState() => _LoginScreenViewState();
 }
 
-class _LoginViewState extends State<LoginView> {
+class _LoginScreenViewState extends State<LoginScreenView> {
   final _authController = Get.find<AuthController>();
 
   final nameController = TextEditingController();
@@ -74,7 +74,7 @@ class _LoginViewState extends State<LoginView> {
           SizedBox(height: height * 0.025),
           _buildTextField(ramalController, 'Ramal', height, keyboard: TextInputType.number),
           SizedBox(height: height * 0.025),
-          _buildTextField(passwordController, 'Senha', height, obscure: true),
+          _buildTextField(passwordController, 'Password', height, obscure: true),
           SizedBox(height: height * 0.05),
           Obx(
                 () => SizedBox(

@@ -14,6 +14,12 @@ class _DefaultCallViewState extends State<DefaultCallView> {
   final TextEditingController _ramalTextController = TextEditingController();
 
   @override
+  void dispose() {
+    _ramalTextController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
     final width = screenSize.width;
@@ -56,12 +62,12 @@ class _DefaultCallViewState extends State<DefaultCallView> {
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: () {
-                    if(_ramalTextController.text.isNotEmpty){
-                      _callController.startCall(
-                        ramalTarget: _ramalTextController.text,
-                        withVideo: false,
-                      );
-                    }
+                      if(_ramalTextController.text.isNotEmpty){
+                        _callController.startCall(
+                          ramalTarget: _ramalTextController.text,
+                          withVideo: false,
+                        );
+                      }
                     },
                     icon: Icon(Icons.call, size: iconSize),
                     label: Text("Voice call", style: TextStyle(fontSize: fontSize)),
