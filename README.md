@@ -14,7 +14,7 @@ This project uses the following packages:
 
 ### Requirements
 
-- Java: `1.8.0_401`
+- Java: `17.0.10`
 - Flutter: `3.22.3`
 - Dart: `3.4.4`
 
@@ -35,6 +35,6 @@ on lib/util/config/sip_config.dart about your connection parameters.
 - incoming call, connected, ended).
 
 ## 🔧 Current Platform in Development
-   [✅] ANDROID | [✅]IOS
+   ✅ ANDROID   |   ✅ IOS
 
 
