@@ -7,6 +7,7 @@ import 'package:pocsip/model/ui/register_state_ui_model.dart';
 import 'package:pocsip/view/states/call/default_call_view.dart';
 import 'package:pocsip/view/states/call/incoming_call_view.dart';
 import 'package:pocsip/view/states/call/making_call_view.dart';
+import 'package:pocsip/view/states/call/on_call_view.dart';
 import 'package:sip_ua/sip_ua.dart';
 
 class HomeScreenView extends StatefulWidget {
@@ -100,7 +101,15 @@ class _HomeScreenViewState extends State<HomeScreenView> {
           return MakingCallView(currentCall.remote_identity);
           //TODO check: Somethings the actual state is lock in STREAM, change in controller?
 
-        } else{
+        } else if(
+        (currentCall.direction == 'OUTGOING' &&
+            currentCallState == CallStateEnum.STREAM)
+            ||
+            (currentCall.direction == 'INCOMING' &&
+                currentCallState == CallStateEnum.CONFIRMED)
+        ){
+          return const OnCallView();
+        }else{
           return Center(child: Text("callState: $currentCallState \n currentCall: ${currentCall.direction}"));
         }
 
@@ -123,6 +132,4 @@ class _HomeScreenViewState extends State<HomeScreenView> {
 
   }
 
-
-//TODO check:  can't call because it is locked in a existing call?
-//
+//TODO verify:  can't call because it is locked in a existing call on SIP Side?
