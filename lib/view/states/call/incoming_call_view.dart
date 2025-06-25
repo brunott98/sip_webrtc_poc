@@ -56,18 +56,12 @@ class IncomingCallView extends StatelessWidget {
               children: [
                 _buildAdaptiveButton(
                   context,
-                  icon: Icons.call,
-                  label: "Voice",
-                  color: Colors.purpleAccent,
-                  onPressed: () => Get.find<CallController>().acceptCall(withVideo: false),
+                  icon: Icons.phonelink_ring,
+                  label: "Accept Call",
+                  color: Colors.green,
+                  onPressed: () => Get.find<CallController>().acceptCall(),
                 ),
-                _buildAdaptiveButton(
-                  context,
-                  icon: Icons.videocam,
-                  label: "Video",
-                  color: Colors.cyan,
-                  onPressed: () => Get.find<CallController>().acceptCall(withVideo: true),
-                ),
+
                 _buildAdaptiveButton(
                   context,
                   icon: Icons.call_end,

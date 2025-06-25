@@ -40,7 +40,7 @@ class _HomeScreenViewState extends State<HomeScreenView> {
 
           Obx(() {
 
-            final currentRegisterState = _callController.registrationState.value;
+            final currentRegisterState = _callController.currentRegistrationStateEnum.value;
             final isNotRegistered = currentRegisterState != RegistrationStateEnum.REGISTERED;
 
             final registerStateUi =
@@ -84,35 +84,34 @@ class _HomeScreenViewState extends State<HomeScreenView> {
 
 
       body: Obx(() {
+        final currentCallStateEnum = _callController.currentCallStateEnum.value;
+        final currentCall          = _callController.currentCall.value;
 
-
-        final currentCallState = _callController.callState.value;
-        final currentCall = _callController.currentCall.value;
-
-        if(currentCall == null){
+        if (currentCall == null) {
           return const DefaultCallView();
 
-        } else if(currentCall.direction == 'INCOMING' &&
-            currentCallState == CallStateEnum.PROGRESS){
-          return  IncomingCallView(currentCall: currentCall);
+        } else if (currentCall.direction == 'INCOMING' &&
+            currentCallStateEnum == CallStateEnum.PROGRESS) {
+          return IncomingCallView(currentCall: currentCall);
 
-        }else if(currentCall.direction == 'OUTGOING' &&
-            currentCallState == CallStateEnum.PROGRESS){
+        } else if (currentCall.direction == 'OUTGOING' &&
+            currentCallStateEnum == CallStateEnum.PROGRESS) {
           return MakingCallView(currentCall.remote_identity);
-          //TODO check: Somethings the actual state is lock in STREAM, change in controller?
 
-        } else if(
-        (currentCall.direction == 'OUTGOING' &&
-            currentCallState == CallStateEnum.STREAM)
-            ||
-            (currentCall.direction == 'INCOMING' &&
-                currentCallState == CallStateEnum.CONFIRMED)
-        ){
+        } else if (currentCallStateEnum == CallStateEnum.CONFIRMED &&
+            (currentCall.direction == 'OUTGOING' ||
+                currentCall.direction == 'INCOMING')) {
           return const OnCallView();
-        }else{
-          return Center(child: Text("callState: $currentCallState \n currentCall: ${currentCall.direction}"));
-        }
 
+
+        } else if (currentCallStateEnum == CallStateEnum.STREAM &&
+            currentCall.direction == 'OUTGOING' &&
+            _callController.remoteStream.value != null) {
+          return const OnCallView();
+
+        } else {
+          return const DefaultCallView();
+        }
       }),
 
     );

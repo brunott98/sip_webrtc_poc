@@ -40,6 +40,16 @@ class _DefaultCallViewState extends State<DefaultCallView> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          Obx(() => Text(
+          'callStateEnum: ${_callController.currentCallStateEnum.value}',
+          style: const TextStyle(fontWeight: FontWeight.bold),
+          )),
+          SizedBox(height: spacing),
+          Obx(() => Text(
+          'callDirection: ${_callController.currentCall.value?.direction ?? "none"}',
+          style: const TextStyle(fontWeight: FontWeight.bold),
+          )),
+          SizedBox(height: spacing),
           TextField(
             controller: _ramalTextController,
             keyboardType: TextInputType.number,
@@ -65,7 +75,7 @@ class _DefaultCallViewState extends State<DefaultCallView> {
                       if(_ramalTextController.text.isNotEmpty){
                         _callController.startCall(
                           ramalTarget: _ramalTextController.text,
-                          withVideo: false,
+                          voiceOnly: true,
                         );
                       }
                     },
@@ -84,7 +94,7 @@ class _DefaultCallViewState extends State<DefaultCallView> {
                       if(_ramalTextController.text.isNotEmpty){
                         _callController.startCall(
                           ramalTarget: _ramalTextController.text,
-                          withVideo: true,
+                          voiceOnly: false,
                         );
                       }
                     },

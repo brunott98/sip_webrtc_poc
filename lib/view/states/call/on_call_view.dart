@@ -17,9 +17,6 @@ class OnCallView extends StatefulWidget {
 class _OnCallViewState extends State<OnCallView> {
   final _callController = Get.find<CallController>();
 
-  final RTCVideoRenderer _remoteRenderer = RTCVideoRenderer();
-  final RTCVideoRenderer _localRenderer  = RTCVideoRenderer();
-
   final Rx<Duration> _elapsed = const Duration().obs;
   Timer? _ticker;
 
@@ -28,72 +25,82 @@ class _OnCallViewState extends State<OnCallView> {
     super.initState();
     _initRenderers();
     _startTicker();
-
-    ever<MediaStream?>(_callController.remoteStream, _updateRemoteStream);
-    ever<MediaStream?>(_callController.localStream,  _updateLocalStream);
-  }
-
-  Future<void> _initRenderers() async {
-    await _remoteRenderer.initialize();
-    await _localRenderer.initialize();
-    _updateRemoteStream(_callController.remoteStream.value);
-    _updateLocalStream(_callController.localStream.value);
-  }
-
-  void _updateRemoteStream(MediaStream? stream) {
-    setState(() => _remoteRenderer.srcObject = stream);
-  }
-
-  void _updateLocalStream(MediaStream? stream) {
-    setState(() => _localRenderer
-      ..srcObject = stream
-      ..muted     = true);
-  }
-
-  void _startTicker() {
-    _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (_callController.callState.value == CallStateEnum.CONFIRMED ||
-          _callController.callState.value == CallStateEnum.STREAM) {
-        _elapsed.value += const Duration(seconds: 1);
-      }
-    });
   }
 
   @override
   void dispose() {
-    _ticker?.cancel();
-    _remoteRenderer.dispose();
-    _localRenderer.dispose();
     super.dispose();
+    _disposeRenderers();
+    _ticker?.cancel();
   }
+
+  Future<void> _initRenderers() async {
+
+    await _callController.ensureRenderers();
+
+  }
+
+  void _disposeRenderers() {
+    if (_callController.localRenderer.value != null) {
+      _callController.localRenderer.value!.dispose();
+      _callController.localRenderer.value = null;
+    }
+    if (_callController.remoteRenderer.value != null) {
+      _callController.remoteRenderer.value!.dispose();
+      _callController.remoteRenderer.value = null;
+    }
+  }
+
+  void _startTicker() {
+    _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (_callController.currentCallStateEnum.value == CallStateEnum.CONFIRMED ||
+          _callController.currentCallStateEnum.value == CallStateEnum.STREAM) {
+
+        if(mounted){
+          _elapsed.value += const Duration(seconds: 1);
+        }
+
+      }
+    });
+  }
+
+
 
   // -------------------- UI --------------------
 
   @override
   Widget build(BuildContext context) {
+
     final theme   = Theme.of(context);
     final size    = MediaQuery.of(context).size;
     final height  = size.height;
     final width   = size.width;
     final call    = _callController.currentCall.value!;
     final ramal   = call.remote_identity ?? '---';
-    final isVideo = !call.voiceOnly && call.remote_has_video;
+    final isVideo = call.remote_has_video;
 
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
         child: Stack(
           children: [
-            ///remote
+            /// REMOTE --------------------------------------------
             Positioned.fill(
               child: isVideo
-                  ? RTCVideoView(
-                _remoteRenderer,
-                objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+                  ? Obx(() =>
+              _callController.remoteStream.value == null ||
+                  _callController.remoteRenderer.value == null
+                  ? _blackScreen()
+                  : RTCVideoView(
+                _callController.remoteRenderer.value!,
+                objectFit: RTCVideoViewObjectFit
+                    .RTCVideoViewObjectFitCover,
+              ),
               )
                   : _buildVoicePlaceholder(theme, ramal),
             ),
-            /// local
+
+            /// LOCAL ---------------------------------------------
             if (isVideo)
               Positioned(
                 right: 16,
@@ -102,29 +109,19 @@ class _OnCallViewState extends State<OnCallView> {
                 height: height * 0.20,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: RTCVideoView(
-                    _localRenderer,
+                  child: Obx(() =>
+                  _callController.localStream.value == null ||
+                      _callController.localRenderer.value == null
+                      ? _blackScreen()
+                      : RTCVideoView(
+                    _callController.localRenderer.value!,
                     mirror: true,
-                    objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+                    objectFit: RTCVideoViewObjectFit
+                        .RTCVideoViewObjectFitCover,
+                  ),
                   ),
                 ),
               ),
-            /// (ramal + cronômetro)
-            Positioned(
-              top:  24,
-              left: 24,
-              child: Obx(() => Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Ramal $ramal',
-                      style: theme.textTheme.titleMedium!
-                          .copyWith(color: Colors.white)),
-                  Text(_formatElapsed(_elapsed.value),
-                      style: theme.textTheme.bodyMedium!
-                          .copyWith(color: Colors.white70)),
-                ],
-              )),
-            ),
             ///control bar
             _buildControls(context, isVideo),
           ],
@@ -156,21 +153,7 @@ class _OnCallViewState extends State<OnCallView> {
           alignment: WrapAlignment.center,
           spacing: 20,
           children: [
-            _circleButton(
-              icon: Icons.mic_off,
-              tooltip: 'Mute',
-              color: Colors.white38,
-              onTap: () => _callController.currentCall.value!.mute(true, false),
-              size: iconSize,
-            ),
-            if (isVideo)
-              _circleButton(
-                icon: Icons.videocam_off,
-                tooltip: 'Vídeo off',
-                color: Colors.white38,
-                onTap: () => _callController.currentCall.value!.mute(false, true),
-                size: iconSize,
-              ),
+
             if (isVideo)
               _circleButton(
                 icon: Icons.flip_camera_ios,
@@ -180,13 +163,7 @@ class _OnCallViewState extends State<OnCallView> {
                     Helper.switchCamera(_callController.localStream.value!.getVideoTracks()[0]),
                 size: iconSize,
               ),
-            _circleButton(
-              icon: Icons.pause,
-              tooltip: 'Hold',
-              color: Colors.white38,
-              onTap: () => _callController.currentCall.value!.hold(),
-              size: iconSize,
-            ),
+
             _circleButton(
               icon: Icons.call_end,
               tooltip: 'Encerrar',
@@ -221,6 +198,6 @@ class _OnCallViewState extends State<OnCallView> {
     );
   }
 
-  String _formatElapsed(Duration d) =>
-      '${d.inMinutes.toString().padLeft(2, '0')}:${(d.inSeconds % 60).toString().padLeft(2, '0')}';
+  Widget _blackScreen() => Container(color: Colors.black);
+
 }
