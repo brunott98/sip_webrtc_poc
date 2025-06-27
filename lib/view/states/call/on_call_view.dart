@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:get/get.dart';
@@ -17,21 +18,17 @@ class OnCallView extends StatefulWidget {
 class _OnCallViewState extends State<OnCallView> {
   final _callController = Get.find<CallController>();
 
-  final Rx<Duration> _elapsed = const Duration().obs;
-  Timer? _ticker;
 
   @override
   void initState() {
     super.initState();
     _initRenderers();
-    _startTicker();
   }
 
   @override
   void dispose() {
     super.dispose();
     _disposeRenderers();
-    _ticker?.cancel();
   }
 
   Future<void> _initRenderers() async {
@@ -49,21 +46,15 @@ class _OnCallViewState extends State<OnCallView> {
       _callController.remoteRenderer.value!.dispose();
       _callController.remoteRenderer.value = null;
     }
+
+    if(_callController.localRenderer.value == null){
+      log("local render cleaned");
+    }
+    if(_callController.remoteRenderer.value == null){
+      log("remote render cleaned");
+    }
+
   }
-
-  void _startTicker() {
-    _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (_callController.currentCallStateEnum.value == CallStateEnum.CONFIRMED ||
-          _callController.currentCallStateEnum.value == CallStateEnum.STREAM) {
-
-        if(mounted){
-          _elapsed.value += const Duration(seconds: 1);
-        }
-
-      }
-    });
-  }
-
 
 
   // -------------------- UI --------------------

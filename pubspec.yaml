@@ -40,6 +40,7 @@ dependencies:
   sip_ua: ^1.0.0
   flutter_webrtc: ^0.10.6
   get: ^4.7.2
+  logger: ^2.0.2+1
 
 dev_dependencies:
   flutter_test:

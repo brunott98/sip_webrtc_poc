@@ -330,6 +330,26 @@ class CallController extends GetxController implements SipUaHelperListener{
     _previousCallStateEnum.value = CallStateEnum.NONE;
     currentCallStateEnum.value   = CallStateEnum.NONE;
     currentCall.value = null;
+
+
+
+    if(remoteStream.value == null){
+      log("Remote Stream cleaned");
+    }
+
+    if(remoteRenderer.value == null){
+      log("Remote Render cleaned");
+    }
+
+    if(localStream.value == null){
+      log("Local Stream cleaned");
+    }
+
+    if(localRenderer.value == null){
+      log("Local Render cleaned");
+    }
+
+
   }
 
 

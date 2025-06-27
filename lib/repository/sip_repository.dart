@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:logger/logger.dart';
 import 'package:pocsip/controller/call_controller.dart';
 import 'package:pocsip/model/data/user_model.dart';
 import 'package:pocsip/util/config/sip_config.dart';
@@ -8,7 +9,7 @@ import 'package:get/get.dart';
 class SipRepository extends GetxController{
 
   final CallController _callController =
-  Get.put(CallController(sipUaHelper: SIPUAHelper()));
+  Get.put(CallController(sipUaHelper: SIPUAHelper(customLogger: Logger(level: Level.off))));
 
   Future<bool> connect(UserModel user) async {
 
