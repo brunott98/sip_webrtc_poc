@@ -317,38 +317,49 @@ class CallController extends GetxController implements SipUaHelperListener{
   }
 
 
-  void clear() {
+  void disposeRenderers() {
+    if (localRenderer.value != null) {
+      localRenderer.value!.dispose();
+      localRenderer.value = null;
+    }
+    if (remoteRenderer.value != null) {
+      remoteRenderer.value!.dispose();
+      remoteRenderer.value = null;
+    }
 
+    if(localRenderer.value == null){
+      log("local render cleaned");
+    }
+    if(remoteRenderer.value == null){
+      log("remote render cleaned");
+    }
+  }
+
+
+
+
+  Future<void> clear() async {
     log("-----------called Clear-----------");
+
+    disposeRenderers();
     if(localStream.value == null) return;
-    localStream.value?.getTracks().forEach((track) {
-      track.stop();
-    });
-    localStream.value!.dispose();
-    localStream.value = null;
+    localStream.value?.getTracks().forEach((t) => t.stop());
+    remoteStream.value?.getTracks().forEach((t) => t.stop());
+
+    localStream.value  = null;
+    remoteStream.value = null;
 
     _previousCallStateEnum.value = CallStateEnum.NONE;
     currentCallStateEnum.value   = CallStateEnum.NONE;
     currentCall.value = null;
 
-
-
     if(remoteStream.value == null){
       log("Remote Stream cleaned");
-    }
-
-    if(remoteRenderer.value == null){
-      log("Remote Render cleaned");
     }
 
     if(localStream.value == null){
       log("Local Stream cleaned");
     }
-
-    if(localRenderer.value == null){
-      log("Local Render cleaned");
-    }
-
 
   }
 

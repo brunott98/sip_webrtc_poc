@@ -28,32 +28,11 @@ class _OnCallViewState extends State<OnCallView> {
   @override
   void dispose() {
     super.dispose();
-    _disposeRenderers();
+    _callController.clear();
   }
 
   Future<void> _initRenderers() async {
-
     await _callController.ensureRenderers();
-
-  }
-
-  void _disposeRenderers() {
-    if (_callController.localRenderer.value != null) {
-      _callController.localRenderer.value!.dispose();
-      _callController.localRenderer.value = null;
-    }
-    if (_callController.remoteRenderer.value != null) {
-      _callController.remoteRenderer.value!.dispose();
-      _callController.remoteRenderer.value = null;
-    }
-
-    if(_callController.localRenderer.value == null){
-      log("local render cleaned");
-    }
-    if(_callController.remoteRenderer.value == null){
-      log("remote render cleaned");
-    }
-
   }
 
 
